@@ -9,6 +9,12 @@ else
   set shiftwidth=2
 endif
 
+set tags=./tags;/
+set number
+
+set clipboard=unnamed
+
+
 set cindent
 
 function FoldBrace()
@@ -22,4 +28,12 @@ function FoldBrace()
 endfunction
 set foldexpr=FoldBrace()
 set foldmethod=expr
-map <f7> :make
+
+command -nargs=* Make make <args> | cwindow 3
+map Make <F7>
+
+map p p=j
+
+set splitright
+
+colors desert
