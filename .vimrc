@@ -1,19 +1,24 @@
-
+set lines=100 
+set columns=165
 
 let _curfile = expand("%:t")
 if _curfile =~ "Makefile" || _curfile =~ "makefile" || _curfile =~ ".*\.mk"
   set noexpandtab
 else
   set expandtab
-  set tabstop=2
-  set shiftwidth=2
+  set tabstop=4
+  set shiftwidth=4
 endif
+
+au BufRead,BufNewFile *.adoc set syntax=asciidoc
+
 
 set tags=./tags;/
 set number
+set backspace=indent,eol,start
 
 set clipboard=unnamed
-
+syntax on
 
 set cindent
 
@@ -37,3 +42,5 @@ map p p=j
 set splitright
 
 colors desert
+
+autocmd BufRead, BufNewFile *.html.erb set filetype=html
