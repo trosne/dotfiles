@@ -4,18 +4,20 @@ set columns=170
 set ruler
 
 if has('gui_running')
-  set guifont=Consolas:h10
   au GUIEnter * simalt ~x
+  set guifont=Consolas\ for\ Powerline\ FixedD:h10
 endif
 
+set encoding=utf-8
 """"""""""""" div
 let _curfile = expand("%:t")
 if _curfile =~ "Makefile" || _curfile =~ "makefile" || _curfile =~ ".*\.mk"
-  set noexpandtab
-else
-  set expandtab
-  set tabstop=4
-  set shiftwidth=4
+    set noexpandtab
+else 
+    set shiftwidth=4
+    set expandtab
+    set tabstop=4
+    set cindent
 endif
 
 set tags=./tags;/
@@ -25,8 +27,6 @@ set backspace=indent,eol,start
 set clipboard=unnamed
 
 syntax enable
-
-set cindent
 
 function! FoldBrace()
 	if getline(v:lnum)[0] == '{'
@@ -42,13 +42,48 @@ set foldmethod=expr
 
 set splitright
 set backspace=2
+set laststatus=2
 
-colors solarized
+""""""""""""""" extensions
+execute pathogen#infect()
+
+"""""" neocomplcache
+let g:neocomplcache_enable_at_startup = 1
+" Enable heavy omni completion.
+if !exists('g:neocomplcache_force_omni_patterns')
+  let g:neocomplcache_force_omni_patterns = {}
+endif
+let g:neocomplcache_force_omni_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
+let g:neocomplcache_force_omni_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
+
+""""""" airline
+try
+    let g:airline_powerline_fonts=1
+    let g:airline_symbols = {}
+    let g:airline_left_sep = "\u2b80" "use double quotes here
+    let g:airline_left_alt_sep = "\u2b81"
+    let g:airline_right_sep = "\u2b82"
+    let g:airline_right_alt_sep = "\u2b83"
+    let g:airline_symbols.branch = "\u2b60"
+    let g:airline_symbols.readonly = "\u2b64"
+    let g:airline_symbols.linenr = "\u2b61"
+    let g:airline#extensions#whitespace#symbol = "\u2736"
+catch
+	echo "Airline already in place"
+endtry
+""""""""""""""" Colorscheme
+let g:solarized_italic = 0
+try
+    colors solarized
+catch /^Vim\%((\a\+)\)\=:E185/ "colorscheme does not exist
+    colors desert " backup
+endtry
+
 """"""""""""""" File types
 au BufRead,BufNewFile *.html.erb set filetype=html
 au BufRead,BufNewFile *.adoc set syntax=asciidoc
 au BufRead,BufNewFile *.ino set filetype=cpp " Arduino
-
+au BufRead,BufNewFile *.py set noexpandtab nocindent tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
 """"""""""""""" mapping
 command! -nargs=* Make make <args> | cwindow 3
