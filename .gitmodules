@@ -10,3 +10,6 @@
 [submodule "vim-airline"]
 	path = vim-airline
 	url = http://github.com/bling/vim-airline.git
+[submodule "vim-colors-solarized"]
+	path = vim-colors-solarized
+	url = http://github.com/altercation/vim-colors-solarized.git
