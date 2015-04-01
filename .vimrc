@@ -57,36 +57,61 @@ let g:neocomplcache_force_omni_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
 let g:neocomplcache_force_omni_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
 
 """"""" airline
-try
-    let g:airline_powerline_fonts=1
-    let g:airline_symbols = {}
-    let g:airline_left_sep = "\u2b80" "use double quotes here
-    let g:airline_left_alt_sep = "\u2b81"
-    let g:airline_right_sep = "\u2b82"
-    let g:airline_right_alt_sep = "\u2b83"
-    let g:airline_symbols.branch = "\u2b60"
-    let g:airline_symbols.readonly = "\u2b64"
-    let g:airline_symbols.linenr = "\u2b61"
-    let g:airline#extensions#whitespace#symbol = "\u2736"
-catch
-	echo "Airline already in place"
-endtry
+let g:airline_powerline_fonts=1
+let g:airline_symbols = {}
+let g:airline_left_sep = "\u2b80" "use double quotes here
+let g:airline_left_alt_sep = "\u2b81"
+let g:airline_right_sep = "\u2b82"
+let g:airline_right_alt_sep = "\u2b83"
+let g:airline_symbols.branch = "\u2b60"
+let g:airline_symbols.readonly = "\u2b64"
+let g:airline_symbols.linenr = "\u2b61"
+let g:airline_symbols.space = ' '
 """"""""""""""" Colorscheme
 let g:solarized_italic = 0
 try
-    colors solarized
+    if has('gui_running')
+        colors solarized
+    else
+        colors desert
+    endif
 catch /^Vim\%((\a\+)\)\=:E185/ "colorscheme does not exist
     colors desert " backup
 endtry
 
 """"""""""""""" File types
+function! SetPythonOptions()
+    set noexpandtab
+    set nocindent
+    set tabstop=8
+    set expandtab
+    set shiftwidth=4
+    set softtabstop=4
+    set smartindent
+endfunction
+function! SetAdocOptions()
+    set syntax=asciidoc
+    set wrap
+    set linebreak
+    set nolist
+    set textwidth=0
+    set wrapmargin=0
+    set nocindent
+    " line navigation for wrapped lines
+    noremap  <buffer> <silent> k gk
+    noremap  <buffer> <silent> j gj
+    noremap  <buffer> <silent> 0 g0
+    noremap  <buffer> <silent> $ g$nnoremap j gj
+endfunction
+
 au BufRead,BufNewFile *.html.erb set filetype=html
-au BufRead,BufNewFile *.adoc set syntax=asciidoc
+au BufRead,BufNewFile *.adoc call SetAdocOptions()
 au BufRead,BufNewFile *.ino set filetype=cpp " Arduino
-au BufRead,BufNewFile *.py set noexpandtab nocindent tabstop=8 expandtab shiftwidth=4 softtabstop=4
+au BufRead,BufNewFile *.py call SetPythonOptions()
 
 """"""""""""""" mapping
 command! -nargs=* Make make <args> | cwindow 3
+command! Vimrc tabedit $USERPROFILE\.vimrc
 map Make <F7>
 
 map p p=j
