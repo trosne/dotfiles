@@ -5,7 +5,7 @@ set ruler
 
 if has('gui_running')
   au GUIEnter * simalt ~x
-  set guifont=Consolas\ for\ Powerline\ FixedD:h10
+  set guifont=Consolas\ for\ Powerline\ FixedD:h10,Consolas:h10
 endif
 
 set encoding=utf-8
