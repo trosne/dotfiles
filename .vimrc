@@ -11,7 +11,7 @@ endif
 set encoding=utf-8
 """"""""""""" div
 let _curfile = expand("%:t")
-if _curfile =~ "Makefile" || _curfile =~ "makefile" || _curfile =~ ".*\.mk"
+if _curfile =~ "Makefile" || _curfile =~ "makefile" || _curfile =~ ".*\.mk" || _curfile =~ "*.nmake"
     set noexpandtab
 else 
     set shiftwidth=4
