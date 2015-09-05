@@ -1,29 +1,32 @@
 @echo off
-SET VIMDIR=%USERPROFILE%\vimfiles
+SET VIMDIR=%PROGRAMFILES(x86)%\vim\vimfiles
+
 SET CURRDIR=%CD%
 
 cls
 
 IF EXIST %VIMDIR% (
     echo Vim directory already exists, moving it to a temporary location.
-    MOVE %VIMDIR% %CURRDIR%\oldvimfiles >NUL
+    MKDIR old
+    MOVE "%VIMDIR%" "%CURRDIR%\old\vimfiles" >NUL
+    MOVE "%VIMDIR%\..\.vimrc" "%CURRDIR%\old\.vimrc" >NUL
+    MKDIR "%VIMDIR%"
 )
 
 echo Making directories...
-MKDIR %VIMDIR%
+MKDIR "%VIMDIR%"
 MKDIR "%VIMDIR%\autoload"
 
 echo Linking vimfiles...
-MKLINK /H "%VIMDIR%\.vimrc" .vimrc >NUL
+MKLINK /H "%VIMDIR%\..\.vimrc" .vimrc >NUL
 MKLINK /H "%VIMDIR%\autoload\pathogen.vim" "%CD%\vim-pathogen\autoload\pathogen.vim" >NUL
 
 REM fontinstall.vbs
 
+cd "%VIMDIR%"
 
-cd %VIMDIR%
-
-MKDIR bundles
-cd bundles
+MKDIR bundle
+cd bundle
 echo Cloning repos...
 call %CURRDIR%\clonegh.bat tpope vim-fugitive
 call %CURRDIR%\clonegh.bat bling vim-airline
