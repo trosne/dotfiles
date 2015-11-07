@@ -64,6 +64,7 @@ call %CURRDIR%\clonegh.bat scrooloose syntastic
 call %CURRDIR%\clonegh.bat xolox vim-easytags
 call %CURRDIR%\clonegh.bat xolox vim-misc
 call %CURRDIR%\clonegh.bat xolox vim-shell
+call %CURRDIR%\clonegh.bat vim-scripts a.vim
 echo Install complete.
 cd %CURRDIR%
 
