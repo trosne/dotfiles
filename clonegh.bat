@@ -7,6 +7,6 @@ if not exist %2 (
 ) else (
     echo %2 Already exists, updating...
     cd %2
-    git pull origin master
+    git pull -q origin master
     cd ..
 )
