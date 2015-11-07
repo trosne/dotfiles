@@ -31,6 +31,10 @@ echo Cloning repos...
 call %CURRDIR%\clonegh.bat tpope vim-fugitive
 call %CURRDIR%\clonegh.bat bling vim-airline
 call %CURRDIR%\clonegh.bat altercation vim-colors-solarized
+call %CURRDIR%\clonegh.bat scrooloose syntastic
+call %CURRDIR%\clonegh.bat xolox vim-easytags
+call %CURRDIR%\clonegh.bat xolox vim-misc
+call %CURRDIR%\clonegh.bat xolox vim-shell
 echo Install complete.
 cd %CURRDIR%
 
