@@ -43,6 +43,8 @@ IF EXIST "%VIMDIR%" IF NOT EXIST "%VIMDIR%\trond.txt" (
 echo Trond was here. Last update: %date% %time% >"%VIMDIR%\trond.txt"
 IF EXIST "%USERPROFILE%\.vimrc" (MOVE "%USERPROFILE%\.vimrc" "%OLDDIR%\.vimrc" >NUL )
 
+IF NOT EXIST "%OLDDIR%\*" (DEL /F %OLDDIR% >NUL )
+
 echo Making directories...
 IF NOT EXIST "%VIMDIR%" (MKDIR "%VIMDIR%")
 IF NOT EXIST "%VIMDIR%\autoload" (MKDIR "%VIMDIR%\autoload")
