@@ -20,7 +20,7 @@ else
     set cindent
 endif
 
-set tags=./tags;/
+set tags=./tags,./..tags,./../../tags,tags,$SDK_ROOT/../tags
 set number
 set backspace=indent,eol,start
 
