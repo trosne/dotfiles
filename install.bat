@@ -28,26 +28,30 @@ SET VIMDIR=%PROGRAMFILES(x86)%\vim\vimfiles
 SET CURRDIR=%CD%
 
 cls
-MKDIR old
+SET OLDDIR=old_%date:~-4,4%%date:~-10,2%%date:~7,2%_%time:~0,2%%time:~3,2%
+MKDIR %OLDDIR%
 
 echo Fetching submodules...
 git submodule update
 
-IF EXIST "%VIMDIR%" (
+
+IF EXIST "%VIMDIR%" IF NOT EXIST "%VIMDIR%\trond.txt" (
     echo Vim directory already exists, moving it to a temporary location.
-    MOVE "%VIMDIR%" "%CURRDIR%\old\vimfiles" >NUL
+    MOVE "%VIMDIR%" "%OLDDIR%\vimfiles" >NUL
     MKDIR "%VIMDIR%"
 )
-IF EXIST %VIMDIR%\..\.vimrc (MOVE "%VIMDIR%\..\.vimrc" "%CURRDIR%\old\.vimrc" >NUL )
+echo Trond was here. Last update: %date% %time% >"%VIMDIR%\trond.txt"
+IF EXIST "%USERPROFILE%\.vimrc" (MOVE "%USERPROFILE%\.vimrc" "%OLDDIR%\.vimrc" >NUL )
 
 echo Making directories...
 IF NOT EXIST "%VIMDIR%" (MKDIR "%VIMDIR%")
 IF NOT EXIST "%VIMDIR%\autoload" (MKDIR "%VIMDIR%\autoload")
 
 echo Linking vimfiles...
-MKLINK /H "%VIMDIR%\..\.vimrc" .vimrc >NUL
+MKLINK /H "%USERPROFILE%\.vimrc" .vimrc >NUL
 IF NOT EXIST "%VIMDIR%\autoload\pathogen.vim" (MKLINK /H "%VIMDIR%\autoload\pathogen.vim" "%CURRDIR%\vim-pathogen\autoload\pathogen.vim" >NUL )
 
+echo Entering %VIMDIR%...
 cd "%VIMDIR%"
 
 IF NOT EXIST bundle (MKDIR bundle)
