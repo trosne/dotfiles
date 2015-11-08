@@ -1,0 +1,9 @@
+https://github.com/easymotion/vim-easymotion
+https://github.com/tpope/vim-fugitive
+https://github.com/bling/vim-airline
+https://github.com/altercation/vim-colors-solarized
+https://github.com/scrooloose/syntastic
+https://github.com/xolox/vim-easytags
+https://github.com/xolox/vim-misc
+https://github.com/xolox/vim-shell
+https://github.com/vim-scripts/a.vim
