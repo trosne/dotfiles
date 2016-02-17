@@ -72,7 +72,7 @@ if not path.isdir(path.join(vimdir, 'autoload')):
 
 print "Linking vimfiles..."
 link(path.join(currdir, '.vimrc'), vimrc)
-if not os.isfile(path.join(vimdir, 'autoload', 'pathogen.vim')):
+if not os.path.isfile(path.join(vimdir, 'autoload', 'pathogen.vim')):
     link(path.join(currdir, 'vim-pathogen', 'autoload', 'pathogen.vim'), path.join(vimdir, 'autoload', 'pathogen.vim'))
 
 print "Entering " + str(vimdir) + "..."
