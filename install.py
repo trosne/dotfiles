@@ -20,6 +20,7 @@ def cloneorupdate(url):
     reponame = url.split('/')[-1]
     if '.git' in reponame:
         reponame = reponame[:-4]
+    print "\tCloning " + reponame + "..."
     if path.isdir(reponame):
         os.chdir(reponame)
         call(['git', 'pull', '-q', 'origin', 'master'])
