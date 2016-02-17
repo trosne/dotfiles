@@ -7,3 +7,4 @@ https://github.com/xolox/vim-easytags
 https://github.com/xolox/vim-misc
 https://github.com/xolox/vim-shell
 https://github.com/vim-scripts/a.vim
+https://github.com/ctrlpvim/ctrlp.vim.git
