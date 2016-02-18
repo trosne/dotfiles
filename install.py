@@ -20,12 +20,13 @@ def cloneorupdate(url):
     reponame = url.split('/')[-1]
     if '.git' in reponame:
         reponame = reponame[:-4]
-    print "\tCloning " + reponame + "..."
     if path.isdir(reponame):
+        print "\tUpdating " + reponame + "..."
         os.chdir(reponame)
         call(['git', 'pull', '-q', 'origin', 'master'])
         os.chdir('..')
     else:
+        print "\tCloning " + reponame + "..."
         call(['git', 'clone', '-q', url])
 
 
@@ -36,7 +37,7 @@ if sys.platform is 'linux32':
     userdir = path.join('~')
     vimdir = path.join('~', '.vim')
 else:
-    userdir = path.join(environ['USERPROFILE'])
+    userdir = path.join("C:\\", "Program Files (x86)", "Vim")
     vimdir = path.join(userdir, 'vimfiles')
     if not path.isdir(vimdir):
         os.mkdir(vimdir)
