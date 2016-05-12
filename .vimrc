@@ -1,12 +1,11 @@
 """""""""""" gVim settings
-"set lines=400
-"set columns=170
 set ruler
 set noswapfile
+set autoread
 
 if has('gui_running')
   au GUIEnter * simalt ~x
-  set guifont=Consolas\ for\ Powerline\ FixedD:h10,Consolas:h10
+  set guifont=Consolas\ for\ Powerline\ FixedD:h10
   set langmenu=en_US
   let $LANG = 'en_US'
   source $VIMRUNTIME/delmenu.vim
@@ -16,7 +15,7 @@ endif
 set encoding=utf-8
 """"""""""""" div
 let _curfile = expand("%:t")
-if _curfile =~ "Makefile" || _curfile =~ "makefile" || _curfile =~ ".*\.mk" || _curfile =~ "*.nmake"
+if _curfile =~ "Makefile" || _curfile =~ "makefile" || _curfile =~ ".*\.mk" || _curfile =~ ".*\.md"
     set noexpandtab
 else
     set shiftwidth=4
@@ -24,7 +23,10 @@ else
     set tabstop=4
 endif
 
-set tags=./tags,./..tags,./../../tags,tags,$SDK_ROOT/../tags,_vimtags
+let g:syntastic_c_include_dirs = []
+let g:localvimrc_whitelist='C:\\Users\\trsn\\Documents\\SDK8\\examples\\.*\\\.lvimrc'
+let g:localvimrc_ask=0
+
 set number
 set backspace=indent,eol,start
 
@@ -36,36 +38,31 @@ syntax enable
 
 let &colorcolumn=join(range(101,999),",")
 
-function! FoldBrace()
-	if getline(v:lnum)[0] == '{'
-		return '>1'
-	endif
-	if getline(v:lnum)[0] == '}'
-		return '<1'
-	endif
-    " Fold license header:
-    if getline(v:lnum) =~ '^\/\*.*$' && v:lnum == 1
-        return '>1'
+function! FoldText()
+    let first_line = getline(v:foldstart)
+    let first_line = substitute(first_line, '^\s*', '')
+    let last_line = getline(v:foldend)
+    let n = v:foldend - v:foldstart + 1
+    let content_text = '...'
+    if n==3
+        let content_text = substitute(getline(v:foldstart+1), '^\s*\**\s*', "", "")
+        if strlen(content_text) > 30
+            let content_text = content_text[:27] . '...'
+        endif
     endif
-    if getline(v:lnum) =~ '^\*\{2,}\/\s*$'
-        return '<1'
-    endif
-    " Fold documentation comments:
-    if getline(v:lnum) =~ '^\/\*\*\s*$' " catch /**\n
-        return '>1'
-    endif
-    if getline(v:lnum) =~ '^\s*\*\/\s*$'
-        return '<1'
-    endif
-	return foldlevel(v:lnum)
+    let info = "+-- " . n . " lines: "
+    let fold_len = 49
+    let content_len = (strlen(info) + strlen(content_text))
+    return info . first_line[: fold_len - 2 - content_len/2] . " " . content_text . " " . last_line[-(fold_len + 1) + content_len/2 + content_len%2:] . ' '
 endfunction
-set foldexpr=FoldBrace()
-set foldmethod=expr
+
+set foldtext=FoldText()
+set foldmethod=syntax
+set foldnestmax=1
 
 set splitright
 set backspace=2
 set laststatus=2
-
 
 if has('gui_running')
     set guioptions-=T
@@ -82,69 +79,82 @@ endfun
 "automatically on save:
 autocmd BufWritePre * :call TrimWhitespace()
 """"""""""""""" extensions
-execute pathogen#infect()
+if has('gui_running')
+    execute pathogen#infect()
+endif
 """"""""""""""" Colorscheme
 let g:solarized_italic = 0
 try
     if has('gui_running')
         colors solarized
     else
-        colors desert
+        colors koehler
     endif
 catch /^Vim\%((\a\+)\)\=:E185/ "colorscheme does not exist
     colors desert " backup
 endtry
 highlight clear SignColumn
-autocmd BufEnter * sign define dummy
-autocmd BufEnter * execute 'sign place 9999 line=1 name=dummy buffer=' . bufnr('')
-"""""" neocomplcache
-let g:neocomplcache_enable_at_startup = 1
-" Enable heavy omni completion.
-if !exists('g:neocomplcache_force_omni_patterns')
-  let g:neocomplcache_force_omni_patterns = {}
-endif
-let g:neocomplcache_force_omni_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
-let g:neocomplcache_force_omni_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
+""""""" CtrlP
+let g:ctrlp_by_filename = 1
+let g:ctrlp_prompt_mappings = {
+    \ 'AcceptSelection("e")': ['<c-t>'],
+    \ 'AcceptSelection("t")': ['<cr>', '<2-LeftMouse>'],
+    \ }
+""""""" Template
+let g:templates_name_prefix='.template_'
 """"""" Syntastic
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
-
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 0
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
-let g:syntastic_c_compiler = 'gcc'
-let g:syntastic_c_include_dirs = [  '%SDK_ROOT%/components/softdevice/s130/headers',
-                                    \'%SDK_ROOT%/components/device',
-                                    \'%SDK_ROOT%/components/toolchain',
-                                    \'%SDK_ROOT%/components/toolchain/gcc',
-                                    \'%SDK_ROOT%/components/libraries/util',
-                                    \'C:/Users/trsn/Documents/SDK8/examples/smart-mesh/mesh/include',
-                                    \'C:/Users/trsn/Documents/SDK8/examples/smart-mesh/scripts/Unity/src'
-                                    \]
-let g:syntastic_c_compiler_options = '-std=gnu99 -DSVCALL_AS_NORMAL_FUNCTION'
-let g:syntastic_loc_list_height=4
+if has('gui_running')
+    "set statusline+=%#warningmsg#
+    "set statusline+=%{SyntasticStatuslineFlag()}
+    "set statusline+=%*
+    let g:syntastic_always_populate_loc_list = 1
+    let g:syntastic_auto_loc_list = 0
+    let g:syntastic_check_on_open = 1
+    let g:syntastic_check_on_wq = 0
+    let g:syntastic_c_compiler = 'gcc'
+    let g:syntastic_c_compiler_options = '-std=gnu99 -DSVCALL_AS_NORMAL_FUNCTION'
+    let g:syntastic_loc_list_height=4
+    let g:syntastic_enable_balloons=0
+    let g:syntastic_enable_signs=0
+else
+    let g:loaded_syntastic_plugin=1
+endif
 
 """"""" airline
-let g:airline#extensions#tabline#enabled = 1
-if !exists('g:airline_symbols')
-    let g:airline_symbols = {}
+if has('gui_running')
+    if !exists('g:airline_symbols')
+        let g:airline_symbols = {}
+    endif
+    let g:airline_left_sep = "\u2b80" "use double quotes here
+    let g:airline_left_alt_sep = "\u2b81"
+    let g:airline_right_sep = "\u2b82"
+    let g:airline_right_alt_sep = "\u2b83"
+    let g:airline_symbols.branch = "\u2b60"
+    let g:airline_symbols.readonly = "\u2b64"
+    let g:airline_symbols.linenr = "\u2b61"
+    let g:airline_symbols.space = ' '
+    "let g:airline#extensions#syntastic#enabled = 1
+    let g:airline#extensions#ctrlp#enabled = 1
+    "let g:airline#extensions#tabline#enabled = 1
+    let g:airline#extensions#tabline#left_sep = "\u2b80"
+    let g:airline#extensions#tabline#left_alt_sep = "\u2b81"
+else
+    let g:loaded_airline=1
+    let g:loaded_xolox_misc=1
 endif
-let g:airline_left_sep = "\u2b80" "use double quotes here
-let g:airline_left_alt_sep = "\u2b81"
-let g:airline_right_sep = "\u2b82"
-let g:airline_right_alt_sep = "\u2b83"
-let g:airline_symbols.branch = "\u2b60"
-let g:airline_symbols.readonly = "\u2b64"
-let g:airline_symbols.linenr = "\u2b61"
-let g:airline_symbols.space = ' '
-let g:airline#extensions#tabline#left_sep = "\u2b80"
-let g:airline#extensions#tabline#left_alt_sep = "\u2b81"
-let g:airline#extensions#syntastic#enabled = 1
 """"""" easytags
-let g:easytags_async = 1
-au FocusGained * HighlightTags
+let g:loaded_easytags=1
+
+" clang_complete
+if has('python')
+    let g:clang_library_path="C:\\Program Files (x86)\\LLVM\\bin"
+    let g:clang_auto_select=1
+    set completeopt=menuone
+    inoremap <C-Space> <C-x><C-o>
+    inoremap <C-@> <C-x><C-o>
+else
+    let g:clang_complete_loaded=1
+endif
 """"""""""""""" File types
 function! SetPythonOptions()
     set noexpandtab
@@ -164,21 +174,32 @@ function! SetAdocOptions()
     set wrapmargin=0
     set nocindent
     " line navigation for wrapped lines
-    noremap  <buffer> <silent> k gk
-    noremap  <buffer> <silent> j gj
-    noremap  <buffer> <silent> 0 g0
-    noremap  <buffer> <silent> $ g$nnoremap j gj
-    noremap <silent> <F5> :w<CR>:!start /min cmd /c C:\Users\trsn\Downloads\asciidoc-8.6.9\asciidoc-8.6.9\asciidoc.py % <CR>
+    nnoremap  <buffer> <silent> k gk
+    nnoremap  <buffer> <silent> j gj
+    nnoremap  <buffer> <silent> 0 g0
+    nnoremap  <buffer> <silent> $ g$
+    noremap <silent> <C-F7> :w<CR>:!start /min cmd /c C:\Users\trsn\Downloads\asciidoc-8.6.9\asciidoc-8.6.9\asciidoc.py % <CR>
 :endfunction
 
 au BufRead,BufNewFile *.html.erb set filetype=html
 au BufRead,BufNewFile *.adoc call SetAdocOptions()
 au BufRead,BufNewFile *.ino set filetype=cpp " Arduino
 au BufRead,BufNewFile *.py call SetPythonOptions()
-au FileType c set cindent
+au BufRead,BufNewFile *.md set filetype=markdown
+au BufWritePost *.msc silent !start mscgen -T png %
+au BufWritePost *.adoc silent !start /min cmd /c C:/Users/trsn/Downloads/asciidoc-8.6.9/asciidoc-8.6.9/asciidoc.py %
+au FileType c silent set cindent
 au FileType cpp set cindent
-
-
+augroup Binary
+    au!
+      au BufReadPre  *.bin let &bin=1
+      au BufReadPost *.bin if &bin | %!xxd
+      au BufReadPost *.bin set ft=xxd | endif
+      au BufWritePre *.bin if &bin | %!xxd -r
+      au BufWritePre *.bin endif
+      au BufWritePost *.bin if &bin | %!xxd
+      au BufWritePost *.bin set nomod | endif
+augroup END
 """"""""""""""" alternate.vim
 map <C-S-k><C-S-o> :AV<CR>
 noremap <C-k><C-o> :A<CR>
@@ -186,7 +207,7 @@ noremap <S-F12> <Leader>ih
 
 """"""""""""""" mapping
 command! -nargs=* Make cd ./gcc || make -w <args> || cd %:p:h | cwindow 3
-command! Vimrc tabedit $USERPROFILE\.vimrc
+command! Vimrc tabedit $VIM\.vimrc
 map Make <F7>
 
 map p p=j
@@ -224,6 +245,9 @@ nnoremap <C-L> <C-W><C-L>
 nnoremap <C-K> <C-W><C-K>
 nnoremap <C-J> <C-W><C-J>
 
+"font set
+nnoremap <C-k><C-f> :set guifont=*<CR>
+
 "move line up or down
 nnoremap <A-j> :m .+1<CR>==
 nnoremap <A-k> :m .-2<CR>==
@@ -249,9 +273,9 @@ function! ScratchCompile()
         silent !cmd  /c "gcc % -o %:h\\temp.exe -mno-ms-bitfields -std=c99" && cls && "%:h\temp.exe" & echo. & echo --------------------------------- & pause
     else
         :execute "tab drop $TEMP\\temp.c"
-        :execute "normal ggdG"
+        :execute "normal gg\"_dG"
         :execute "read $TEMP\\template.c"
-        :execute "normal ggddzR/main\<CR>jj"
+        :execute "normal gg\"_ddzR/main\<CR>jj"
         :execute "w"
     endif
 :endfunction
@@ -262,6 +286,9 @@ nnoremap <F12> <C-]>
 inoremap <F12> <Esc><C-]>
 nnoremap <C-F12> 5<C-w><C-]>
 inoremap <C-F12> <Esc>5<C-w><C-]>
+" Stack overflow
+nnoremap <C-k><C-s> :StackOverflow<space>
+
 
 "comment:
 function! CommentOut()
@@ -280,4 +307,3 @@ function! CommentOut()
     endtry
 :endfunction
 map <silent> <C-k><C-c> :call CommentOut()<CR>
-

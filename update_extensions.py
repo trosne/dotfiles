@@ -1,6 +1,7 @@
 import os
 from os import path, environ
 import sys
+from threading import Thread
 from datetime import datetime
 from subprocess import call
 import subprocess
@@ -21,12 +22,12 @@ def cloneorupdate(url):
     if '.git' in reponame:
         reponame = reponame[:-4]
     if path.isdir(reponame):
-        print "\tUpdating " + reponame + "..."
+        sys.stdout.write("Updating " + reponame + "...\n")
         os.chdir(reponame)
-        call(['git', 'pull', '-q', 'origin', 'master'])
+        print("\t" + subprocess.check_output(['git', 'pull', '-n', 'origin', 'master'], stderr=subprocess.STDOUT).splitlines()[-1])
         os.chdir('..')
     else:
-        print "\tCloning " + reponame + "..."
+        sys.stdout.write("Cloning " + reponame + "...\n")
         call(['git', 'clone', '-q', url])
 
 
@@ -55,9 +56,16 @@ if not path.isdir('bundle'):
     os.mkdir('bundle')
 os.chdir('bundle')
 print "Cloning repos..."
+threads = []
 with open(path.join(currdir, 'plugins.txt'), 'r') as f:
     for line in f:
-        cloneorupdate(line.split()[0])
+        thread = Thread(target=cloneorupdate, args=(line.split()[0],))
+        threads.append(thread)
+        thread.start()
+        if not "--async" in sys.argv:
+            thread.join()
+for thread in threads:
+    thread.join()
 print "Install complete."
 os.chdir(currdir)
 
