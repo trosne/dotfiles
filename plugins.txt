@@ -7,6 +7,7 @@ https://github.com/ctrlpvim/ctrlp.vim.git
 https://github.com/mickaobrien/vim-stackoverflow
 https://github.com/vim-airline/vim-airline-themes
 https://github.com/embear/vim-localvimrc
-https://github.com/Rip-Rip/clang_complete
 https://github.com/aperezdc/vim-template
-https://github.com/scrooloose/syntastic
+https://github.com/valloric/YouCompleteMe
+https://github.com/godlygeek/tabular
+https://github.com/trond-snekvik/ctrlp-funky
