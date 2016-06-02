@@ -36,7 +36,6 @@ set incsearch
 
 syntax enable
 
-let &colorcolumn=join(range(101,999),",")
 
 function! FoldText()
     let first_line = getline(v:foldstart)
@@ -86,14 +85,17 @@ endif
 let g:solarized_italic = 0
 try
     if has('gui_running')
-        colors solarized
+        colors busybee
     else
-        colors solarized
+        colors busybee
     endif
 catch /^Vim\%((\a\+)\)\=:E185/ "colorscheme does not exist
     colors desert " backup
 endtry
 highlight clear SignColumn
+let &colorcolumn=join(range(101,999),",")
+highlight ColorColumn guibg=Black
+highlight Comment guifg=#5c5c5c
 """"""" CtrlP
 let g:ctrlp_by_filename = 1
 let g:ctrlp_custom_ignore='.*\.pyc'

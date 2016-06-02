@@ -11,3 +11,4 @@ https://github.com/aperezdc/vim-template
 https://github.com/valloric/YouCompleteMe
 https://github.com/godlygeek/tabular
 https://github.com/trond-snekvik/ctrlp-funky
+https://github.com/flazz/vim-colorschemes
