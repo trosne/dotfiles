@@ -164,6 +164,7 @@ function! SetPythonOptions()
     set shiftwidth=4
     set softtabstop=4
     set smartindent
+    set autoindent
 endfunction
 function! SetAdocOptions()
     set syntax=asciidoc
@@ -199,6 +200,10 @@ augroup Binary
       au BufWritePre *.bin endif
       au BufWritePost *.bin if &bin | %!xxd
       au BufWritePost *.bin set nomod | endif
+augroup END
+augroup PreviewOnBottom
+    autocmd InsertEnter * set splitbelow
+    autocmd InsertLeave * set splitbelow!
 augroup END
 """"""""""""""" alternate.vim
 map <C-S-k><C-S-o> :AV<CR>
