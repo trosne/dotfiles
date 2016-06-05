@@ -95,8 +95,9 @@ endtry
 highlight clear SignColumn
 let &colorcolumn=join(range(80,999),",")
 """"""" CtrlP
+set wildignore=*.pyc,*.o,*.d,*.crf,*.elf,*.axf
 let g:ctrlp_by_filename = 1
-let g:ctrlp_custom_ignore='.*\.pyc'
+let g:ctrlp_custom_ignore = '.*\.(pyc|o|crf|d)'
 let g:ctrlp_prompt_mappings = {
     \ 'AcceptSelection("e")': ['<c-t>'],
     \ 'AcceptSelection("t")': ['<cr>', '<2-LeftMouse>'],
