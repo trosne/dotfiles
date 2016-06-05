@@ -38,6 +38,7 @@ if sys.platform is 'linux32':
     vimdir = path.join('~', '.vim')
 else:
     userdir = path.join("C:\\", "Program Files (x86)", "Vim")
+    userdir = os.environ['USERPROFILE'] #path.join("C:\\", "User", "Trond")
     vimdir = path.join(userdir, 'vimfiles')
     if not path.isdir(vimdir):
         os.mkdir(vimdir)
