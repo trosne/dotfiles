@@ -5,7 +5,7 @@ set autoread
 
 if has('gui_running')
   au GUIEnter * simalt ~x
-  set guifont=Consolas\ for\ Powerline\ FixedD:h10
+  set guifont=Consolas\ for\ Powerline\ FixedD:h11
   set langmenu=en_US
   let $LANG = 'en_US'
   source $VIMRUNTIME/delmenu.vim
@@ -36,7 +36,6 @@ set incsearch
 
 syntax enable
 
-let &colorcolumn=join(range(101,999),",")
 
 function! FoldText()
     let first_line = getline(v:foldstart)
@@ -86,20 +85,24 @@ endif
 let g:solarized_italic = 0
 try
     if has('gui_running')
-        colors solarized
+        colors busybee
     else
-        colors koehler
+        colors busybee
     endif
 catch /^Vim\%((\a\+)\)\=:E185/ "colorscheme does not exist
     colors desert " backup
 endtry
 highlight clear SignColumn
+let &colorcolumn=join(range(80,999),",")
 """"""" CtrlP
+set wildignore=*.pyc,*.o,*.d,*.crf,*.elf,*.axf
 let g:ctrlp_by_filename = 1
+let g:ctrlp_custom_ignore = '.*\.(pyc|o|crf|d)'
 let g:ctrlp_prompt_mappings = {
     \ 'AcceptSelection("e")': ['<c-t>'],
     \ 'AcceptSelection("t")': ['<cr>', '<2-LeftMouse>'],
     \ }
+nnoremap <C-F> :CtrlPFunky<CR>
 """"""" Template
 let g:templates_name_prefix='.template_'
 """"""" Syntastic
@@ -149,12 +152,18 @@ let g:loaded_easytags=1
 if has('python')
     let g:clang_library_path="C:\\Program Files (x86)\\LLVM\\bin"
     let g:clang_auto_select=1
-    set completeopt=menuone
+    set completeopt=menuone,preview
     inoremap <C-Space> <C-x><C-o>
     inoremap <C-@> <C-x><C-o>
 else
     let g:clang_complete_loaded=1
 endif
+" Youcompleteme
+let g:ycm_server_python_interpreter="C:/Python27/python.exe"
+let g:ycm_confirm_extra_conf=0
+let g:ycm_key_list_previous_completion = ['<Up>', '<C-k>']
+let g:ycm_key_list_select_completion   = ['<Down>', '<C-j>', '<Tab>']
+let g:ycm_goto_buffer_command = 'new-or-existing-tab'
 """"""""""""""" File types
 function! SetPythonOptions()
     set noexpandtab
@@ -206,16 +215,14 @@ augroup PreviewOnBottom
     autocmd InsertLeave * set splitbelow!
 augroup END
 """"""""""""""" alternate.vim
-map <C-S-k><C-S-o> :AV<CR>
-noremap <C-k><C-o> :A<CR>
+map <silent> <C-S-k><C-S-o> :AV<CR>
+noremap <silent> <C-k><C-o> :A<CR>
 noremap <S-F12> <Leader>ih
 
 """"""""""""""" mapping
 command! -nargs=* Make cd ./gcc || make -w <args> || cd %:p:h | cwindow 3
 command! Vimrc tabedit $VIM\.vimrc
 map Make <F7>
-
-map p p=j
 
 map <C-c> Esc
 function! NextError()
@@ -272,6 +279,9 @@ inoremap <C-S-Tab> <Esc><C-S-Tab>
 
 inoremap <S-Tab> <C-d>
 
+" stop the bloody minimizing -> do undo instead
+nnoremap <C-z> u
+
 "scratch compilation:
 function! ScratchCompile()
     if expand("%:p") == expand('$TEMP\temp.c')
@@ -287,8 +297,8 @@ function! ScratchCompile()
 noremap <F5> <Esc>:call ScratchCompile()<CR>
 
 "ctags
-nnoremap <F12> <C-]>
-inoremap <F12> <Esc><C-]>
+nnoremap <F12> :YcmCompleter GoToDefinition<CR>
+inoremap <F12> <Esc>:YcmCompleter GoToDefinition<CR>
 nnoremap <C-F12> 5<C-w><C-]>
 inoremap <C-F12> <Esc>5<C-w><C-]>
 " Stack overflow
@@ -312,3 +322,4 @@ function! CommentOut()
     endtry
 :endfunction
 map <silent> <C-k><C-c> :call CommentOut()<CR>
+
