@@ -93,9 +93,7 @@ catch /^Vim\%((\a\+)\)\=:E185/ "colorscheme does not exist
     colors desert " backup
 endtry
 highlight clear SignColumn
-let &colorcolumn=join(range(101,999),",")
-highlight ColorColumn guibg=Black
-highlight Comment guifg=#5c5c5c
+let &colorcolumn=join(range(80,999),",")
 """"""" CtrlP
 let g:ctrlp_by_filename = 1
 let g:ctrlp_custom_ignore='.*\.pyc'
