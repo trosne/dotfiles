@@ -24,8 +24,10 @@ def cloneorupdate(url):
     if path.isdir(reponame):
         sys.stdout.write("Updating " + reponame + "...\n")
         os.chdir(reponame)
-        print("\t" + subprocess.check_output(['git', 'pull', '-n', 'origin', 'master'], stderr=subprocess.STDOUT).splitlines()[-1])
-        os.chdir('..')
+        try:
+            print("\t" + subprocess.check_output(['git', 'pull', '-n', 'origin', 'master'], stderr=subprocess.STDOUT).splitlines()[-1])
+        finally:
+            os.chdir('..')
     else:
         sys.stdout.write("Cloning " + reponame + "...\n")
         call(['git', 'clone', '-q', url])
