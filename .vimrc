@@ -1,15 +1,14 @@
 """""""""""" gVim settings
-set ruler
-set noswapfile
-set autoread
-
 if has('gui_running')
-  au GUIEnter * simalt ~x
-  set guifont=Consolas\ for\ Powerline\ FixedD:h11
-  set langmenu=en_US
-  let $LANG = 'en_US'
-  source $VIMRUNTIME/delmenu.vim
-  source $VIMRUNTIME/menu.vim
+    au GUIEnter * simalt ~x
+    set guifont=Consolas\ for\ Powerline\ FixedD:h11
+    set langmenu=en_US
+    let $LANG = 'en_US'
+    source $VIMRUNTIME/delmenu.vim
+    source $VIMRUNTIME/menu.vim
+    set guioptions-=T
+    set guioptions-=m
+    set guioptions-=e
 endif
 
 set encoding=utf-8
@@ -24,19 +23,27 @@ else
 endif
 
 let g:syntastic_c_include_dirs = []
-let g:localvimrc_whitelist='C:\\Users\\trsn\\Documents\\SDK8\\examples\\.*\\\.lvimrc'
+let g:localvimrc_sandbox=0
 let g:localvimrc_ask=0
 
+" generic settings
+set ruler
+set noswapfile
+set autoread
 set number
+set smartindent
 set backspace=indent,eol,start
-
 set clipboard=unnamed
-
 set incsearch
-
+set splitright
+set splitbelow
+set backspace=2
+set laststatus=2
+let mapleader = " "
 syntax enable
 
 
+"folding
 function! FoldText()
     let first_line = getline(v:foldstart)
     let first_line = substitute(first_line, '^\s*', '')
@@ -58,16 +65,6 @@ endfunction
 set foldtext=FoldText()
 set foldmethod=syntax
 set foldnestmax=1
-
-set splitright
-set backspace=2
-set laststatus=2
-
-if has('gui_running')
-    set guioptions-=T
-    set guioptions-=m
-    set guioptions-=e
-endif
 
 "Trim whitespace
 function! TrimWhitespace()
@@ -98,11 +95,11 @@ let &colorcolumn=join(range(80,999),",")
 set wildignore=*.pyc,*.o,*.d,*.crf,*.elf,*.axf
 let g:ctrlp_by_filename = 1
 let g:ctrlp_custom_ignore = '.*\.(pyc|o|crf|d)'
-let g:ctrlp_prompt_mappings = {
-    \ 'AcceptSelection("e")': ['<c-t>'],
-    \ 'AcceptSelection("t")': ['<cr>', '<2-LeftMouse>'],
-    \ }
-nnoremap <C-F> :CtrlPFunky<CR>
+let g:ctrlp_prompt_mappings = {'AcceptSelection("e")': ['<c-t>'], 'AcceptSelection("t")': ['<cr>', '<2-LeftMouse>'], }
+nnoremap <leader>p :CtrlPMRU<CR>
+nnoremap <silent> <leader>f :CtrlPFunky<CR>
+let g:ctrlp_funky_syntax_highlight=1
+let g:ctrlp_funky_after_jump='ztjzok'
 """"""" Template
 let g:templates_name_prefix='.template_'
 """"""" Syntastic
@@ -145,25 +142,15 @@ else
     let g:loaded_airline=1
     let g:loaded_xolox_misc=1
 endif
-""""""" easytags
-let g:loaded_easytags=1
-
-" clang_complete
-if has('python')
-    let g:clang_library_path="C:\\Program Files (x86)\\LLVM\\bin"
-    let g:clang_auto_select=1
-    set completeopt=menuone,preview
-    inoremap <C-Space> <C-x><C-o>
-    inoremap <C-@> <C-x><C-o>
-else
-    let g:clang_complete_loaded=1
-endif
 " Youcompleteme
 let g:ycm_server_python_interpreter="C:/Python27/python.exe"
 let g:ycm_confirm_extra_conf=0
 let g:ycm_key_list_previous_completion = ['<Up>', '<C-k>']
 let g:ycm_key_list_select_completion   = ['<Down>', '<C-j>', '<Tab>']
 let g:ycm_goto_buffer_command = 'new-or-existing-tab'
+let g:ycm_min_num_of_chars_for_completion = 99
+let g:ycm_min_num_identifier_candidate_chars = 4
+nnoremap <Leader>e :YcmDiags<CR>
 """"""""""""""" File types
 function! SetPythonOptions()
     set noexpandtab
@@ -173,7 +160,6 @@ function! SetPythonOptions()
     set shiftwidth=4
     set softtabstop=4
     set smartindent
-    set autoindent
 endfunction
 function! SetAdocOptions()
     set syntax=asciidoc
@@ -191,6 +177,12 @@ function! SetAdocOptions()
     noremap <silent> <C-F7> :w<CR>:!start /min cmd /c C:\Users\trsn\Downloads\asciidoc-8.6.9\asciidoc-8.6.9\asciidoc.py % <CR>
 :endfunction
 
+"quickfix stuff
+au BufWinEnter quickfix setl cc=999 " No color column in quickfix window
+au BufWinEnter quickfix resize 6
+au BufWinEnter quickfix nnoremap <buffer> <Esc> :q<CR>
+
+" autocommands
 au BufRead,BufNewFile *.html.erb set filetype=html
 au BufRead,BufNewFile *.adoc call SetAdocOptions()
 au BufRead,BufNewFile *.ino set filetype=cpp " Arduino
@@ -210,20 +202,32 @@ augroup Binary
       au BufWritePost *.bin if &bin | %!xxd
       au BufWritePost *.bin set nomod | endif
 augroup END
-augroup PreviewOnBottom
-    autocmd InsertEnter * set splitbelow
-    autocmd InsertLeave * set splitbelow!
-augroup END
-""""""""""""""" alternate.vim
-map <silent> <C-S-k><C-S-o> :AV<CR>
-noremap <silent> <C-k><C-o> :A<CR>
-noremap <S-F12> <Leader>ih
-
 """"""""""""""" mapping
-command! -nargs=* Make cd ./gcc || make -w <args> || cd %:p:h | cwindow 3
 command! Vimrc tabedit $VIM\.vimrc
-map Make <F7>
+nnoremap <F7> :Make<CR>
 
+""""""""""""""""""""""" MOVEMENT
+"window split navigation
+nnoremap <C-H> <C-W><C-H>
+nnoremap <C-L> <C-W><C-L>
+nnoremap <C-K> <C-W><C-K>
+nnoremap <C-J> <C-W><C-J>
+"move line up or down
+nnoremap <A-j> :m .+1<CR>==
+nnoremap <A-k> :m .-2<CR>==
+inoremap <A-j> <Esc>:m .+1<CR>==gi
+inoremap <A-k> <Esc>:m .-2<CR>==gi
+vnoremap <A-j> :m '>+1<CR>gv=gv
+vnoremap <A-k> :m '<-2<CR>gv=gv
+"tab navigation
+nnoremap <C-Tab> gt
+nnoremap <C-S-Tab> gT
+inoremap <C-Tab> <Esc>gt
+inoremap <C-S-Tab> <Esc>gT
+vnoremap <C-Tab> <Esc>gt
+vnoremap <C-S-Tab> <Esc>gT
+
+""""""""""""""""""""""""" Various
 map <C-c> Esc
 function! NextError()
     try
@@ -236,49 +240,14 @@ function! NextError()
         endtry
     endtry
 :endfunction
-
-function! PrevError()
-    try
-        lprev
-    catch
-        try
-            ll
-        catch
-            echo "No more errors"
-        endtry
-    endtry
-:endfunction
-map <F4> <Esc>:call NextError()<CR>
-map <S-F4> <Esc>:call PrevError()<CR>
-
-"window split navigation
-nnoremap <C-H> <C-W><C-H>
-nnoremap <C-L> <C-W><C-L>
-nnoremap <C-K> <C-W><C-K>
-nnoremap <C-J> <C-W><C-J>
+map <leader>n <Esc>:call NextError()<CR>
 
 "font set
-nnoremap <C-k><C-f> :set guifont=*<CR>
-
-"move line up or down
-nnoremap <A-j> :m .+1<CR>==
-nnoremap <A-k> :m .-2<CR>==
-inoremap <A-j> <Esc>:m .+1<CR>==gi
-inoremap <A-k> <Esc>:m .-2<CR>==gi
-vnoremap <A-j> :m '>+1<CR>gv=gv
-vnoremap <A-k> :m '<-2<CR>gv=gv
-
+nnoremap <F11> :set guifont=*<CR>
+" Shift tab to reduce indent level
+inoremap <S-Tab> <C-d>
 "insert mode paste
 inoremap <C-v> <Esc>pa
-
-"tab navigation
-nnoremap <C-Tab> gt
-nnoremap <C-S-Tab> gT
-inoremap <C-Tab> <Esc><C-Tab>
-inoremap <C-S-Tab> <Esc><C-S-Tab>
-
-inoremap <S-Tab> <C-d>
-
 " stop the bloody minimizing -> do undo instead
 nnoremap <C-z> u
 
@@ -294,7 +263,7 @@ function! ScratchCompile()
         :execute "w"
     endif
 :endfunction
-noremap <F5> <Esc>:call ScratchCompile()<CR>
+noremap <leader>c <Esc>:call ScratchCompile()<CR>
 
 "ctags
 nnoremap <F12> :YcmCompleter GoToDefinition<CR>
@@ -302,24 +271,8 @@ inoremap <F12> <Esc>:YcmCompleter GoToDefinition<CR>
 nnoremap <C-F12> 5<C-w><C-]>
 inoremap <C-F12> <Esc>5<C-w><C-]>
 " Stack overflow
-nnoremap <C-k><C-s> :StackOverflow<space>
+nnoremap <leader>s :StackOverflow<space>
 
-
-"comment:
-function! CommentOut()
-    try
-        execute '.s:\(\s*\)/\* \(.*\) \*/\s*:\1\2:g'
-    catch /E486:/
-        try
-            execute '.s:\(\s*\)/\*\(.*\)\*/\s*:\1\2:g'
-        catch /E486:/
-            try
-                execute '.s:\(\s*\)\(.*\):\1/\* \2 \*/:g'
-            catch /E486:/
-                echo "Error while commenting out"
-            endtry
-        endtry
-    endtry
-:endfunction
-map <silent> <C-k><C-c> :call CommentOut()<CR>
-
+"uv
+nnoremap <leader>up :call UV#SelProj()<CR>
+nnoremap <leader>ut :call UV#SelProj()<CR>
