@@ -1,3 +1,4 @@
+au!
 """""""""""" gVim settings
 if has('gui_running')
     au GUIEnter * simalt ~x
@@ -6,15 +7,14 @@ if has('gui_running')
     let $LANG = 'en_US'
     source $VIMRUNTIME/delmenu.vim
     source $VIMRUNTIME/menu.vim
-    set guioptions-=T
-    set guioptions-=m
-    set guioptions-=e
+    set guioptions=
+    let &colorcolumn=join(range(120,999),",")
 endif
 
 set encoding=utf-8
 """"""""""""" div
 let _curfile = expand("%:t")
-if _curfile =~ "Makefile" || _curfile =~ "makefile" || _curfile =~ ".*\.mk" || _curfile =~ ".*\.md"
+if _curfile =~ "Makefile" || _curfile =~ "makefile" || _curfile =~ ".*\.mk" || _curfile =~ ".*\.md" || _curfile =~ ".*\.snippets"
     set noexpandtab
 else
     set shiftwidth=4
@@ -22,11 +22,12 @@ else
     set tabstop=4
 endif
 
-let g:syntastic_c_include_dirs = []
 let g:localvimrc_sandbox=0
 let g:localvimrc_ask=0
 
 " generic settings
+set noshowmode
+set lazyredraw
 set ruler
 set noswapfile
 set autoread
@@ -39,8 +40,10 @@ set splitright
 set splitbelow
 set backspace=2
 set laststatus=2
+set previewheight=1
 let mapleader = " "
-syntax enable
+syntax on
+set rop=type:directx,geom:1,taamode:1
 
 
 "folding
@@ -82,19 +85,21 @@ endif
 let g:solarized_italic = 0
 try
     if has('gui_running')
-        colors busybee
+        let g:gruvbox_italic=0
+        let g:gruvbox_bold=0
+        let g:gruvbox_invert_selection=0
+        colors gruvbox
     else
         colors busybee
     endif
 catch /^Vim\%((\a\+)\)\=:E185/ "colorscheme does not exist
     colors desert " backup
 endtry
-highlight clear SignColumn
-let &colorcolumn=join(range(80,999),",")
+"highlight clear SignColumn
 """"""" CtrlP
-set wildignore=*.pyc,*.o,*.d,*.crf,*.elf,*.axf
+set wildignore=*.pyc,*.o,*.d,*.crf,*.elf,*.axf,_viminfo,*._2i,*.lst,*.dep,*.exe,*.bin
 let g:ctrlp_by_filename = 1
-let g:ctrlp_custom_ignore = '.*\.(pyc|o|crf|d)'
+let g:ctrlp_custom_ignore = '.*\.(pyc|obj|o|crf|d|bin|exe)'
 let g:ctrlp_prompt_mappings = {'AcceptSelection("e")': ['<c-t>'], 'AcceptSelection("t")': ['<cr>', '<2-LeftMouse>'], }
 nnoremap <leader>p :CtrlPMRU<CR>
 nnoremap <silent> <leader>f :CtrlPFunky<CR>
@@ -103,16 +108,12 @@ let g:ctrlp_funky_after_jump='ztjzok'
 """"""" Template
 let g:templates_name_prefix='.template_'
 """"""" Syntastic
-if has('gui_running')
-    "set statusline+=%#warningmsg#
-    "set statusline+=%{SyntasticStatuslineFlag()}
-    "set statusline+=%*
+if has('gui_running') && !exists('g:loaded_syntastic_plugin')
     let g:syntastic_always_populate_loc_list = 1
     let g:syntastic_auto_loc_list = 0
     let g:syntastic_check_on_open = 1
     let g:syntastic_check_on_wq = 0
-    let g:syntastic_c_compiler = 'gcc'
-    let g:syntastic_c_compiler_options = '-std=gnu99 -DSVCALL_AS_NORMAL_FUNCTION'
+    let g:syntastic_c_compiler = 'arm-none-eabi-gcc'
     let g:syntastic_loc_list_height=4
     let g:syntastic_enable_balloons=0
     let g:syntastic_enable_signs=0
@@ -133,14 +134,12 @@ if has('gui_running')
     let g:airline_symbols.readonly = "\u2b64"
     let g:airline_symbols.linenr = "\u2b61"
     let g:airline_symbols.space = ' '
-    "let g:airline#extensions#syntastic#enabled = 1
+    let g:airline_symbols.notexists = ' ✶'
     let g:airline#extensions#ctrlp#enabled = 1
-    "let g:airline#extensions#tabline#enabled = 1
     let g:airline#extensions#tabline#left_sep = "\u2b80"
     let g:airline#extensions#tabline#left_alt_sep = "\u2b81"
 else
     let g:loaded_airline=1
-    let g:loaded_xolox_misc=1
 endif
 " Youcompleteme
 let g:ycm_server_python_interpreter="C:/Python27/python.exe"
@@ -152,7 +151,7 @@ let g:ycm_min_num_of_chars_for_completion = 99
 let g:ycm_min_num_identifier_candidate_chars = 4
 nnoremap <Leader>e :YcmDiags<CR>
 """"""""""""""" File types
-function! SetPythonOptions()
+fu! SetPythonOptions()
     set noexpandtab
     set nocindent
     set tabstop=8
@@ -160,23 +159,42 @@ function! SetPythonOptions()
     set shiftwidth=4
     set softtabstop=4
     set smartindent
-endfunction
-function! SetAdocOptions()
-    set syntax=asciidoc
-    set wrap
-    set linebreak
-    set nolist
-    set textwidth=0
-    set wrapmargin=0
-    set nocindent
+endf
+
+fu! Autowrap()
+    if synID(line("."),col("."),1)==0
+        normal gqip
+    endif
+endf
+
+fu! SetAdocOptions()
+    setl syntax=asciidoc
+    setl wrap
+    setl linebreak
+    setl nolist
+    setl textwidth=129
+    setl wrapmargin=0
+    setl nocindent
     " line navigation for wrapped lines
     nnoremap  <buffer> <silent> k gk
     nnoremap  <buffer> <silent> j gj
     nnoremap  <buffer> <silent> 0 g0
     nnoremap  <buffer> <silent> $ g$
-    noremap <silent> <C-F7> :w<CR>:!start /min cmd /c C:\Users\trsn\Downloads\asciidoc-8.6.9\asciidoc-8.6.9\asciidoc.py % <CR>
-:endfunction
+    compiler asciidoctor
+    let &colorcolumn=join(range(&textwidth+1,999),",")
+endf
 
+fu! SetUVfileOptions()
+    setl syntax=xml
+    setl shiftwidth=2
+    setl softtabstop=2
+    setl smartindent
+    setl nocindent
+    setl foldmethod=indent
+    setl foldlevelstart=999
+    setl foldminlines=0
+    setl foldnestmax=999
+endf
 "quickfix stuff
 au BufWinEnter quickfix setl cc=999 " No color column in quickfix window
 au BufWinEnter quickfix resize 6
@@ -185,10 +203,12 @@ au BufWinEnter quickfix nnoremap <buffer> <Esc> :q<CR>
 " autocommands
 au BufRead,BufNewFile *.html.erb set filetype=html
 au BufRead,BufNewFile *.adoc call SetAdocOptions()
+au CursorHold *.adoc call Autowrap()
+au BufRead,BufNewFile *.uvprojx call SetUVfileOptions()
 au BufRead,BufNewFile *.ino set filetype=cpp " Arduino
 au BufRead,BufNewFile *.py call SetPythonOptions()
 au BufRead,BufNewFile *.md set filetype=markdown
-au BufWritePost *.msc silent !start mscgen -T png %
+au BufWritePost *.msc silent exe "call job_start('mscgen -T png " . expand('%') ."')"
 au BufWritePost *.adoc silent !start /min cmd /c C:/Users/trsn/Downloads/asciidoc-8.6.9/asciidoc-8.6.9/asciidoc.py %
 au FileType c silent set cindent
 au FileType cpp set cindent
@@ -213,10 +233,10 @@ nnoremap <C-L> <C-W><C-L>
 nnoremap <C-K> <C-W><C-K>
 nnoremap <C-J> <C-W><C-J>
 "move line up or down
-nnoremap <A-j> :m .+1<CR>==
-nnoremap <A-k> :m .-2<CR>==
-inoremap <A-j> <Esc>:m .+1<CR>==gi
-inoremap <A-k> <Esc>:m .-2<CR>==gi
+nnoremap <A-j> ddp
+nnoremap <A-k> ddkP
+inoremap <A-j> <Esc>ddp
+inoremap <A-k> <Esc>ddkP
 vnoremap <A-j> :m '>+1<CR>gv=gv
 vnoremap <A-k> :m '<-2<CR>gv=gv
 "tab navigation
@@ -227,7 +247,9 @@ inoremap <C-S-Tab> <Esc>gT
 vnoremap <C-Tab> <Esc>gt
 vnoremap <C-S-Tab> <Esc>gT
 
-""""""""""""""""""""""""" Various
+" auto pair
+let g:AutoPairsMapSpace = 0
+""""""""""""""""""""""""" VARIOUS
 map <C-c> Esc
 function! NextError()
     try
@@ -251,28 +273,102 @@ inoremap <C-v> <Esc>pa
 " stop the bloody minimizing -> do undo instead
 nnoremap <C-z> u
 
-"scratch compilation:
-function! ScratchCompile()
-    if expand("%:p") == expand('$TEMP\temp.c')
-        silent !cmd  /c "gcc % -o %:h\\temp.exe -mno-ms-bitfields -std=c99" && cls && "%:h\temp.exe" & echo. & echo --------------------------------- & pause
-    else
-        :execute "tab drop $TEMP\\temp.c"
-        :execute "normal gg\"_dG"
-        :execute "read $TEMP\\template.c"
-        :execute "normal gg\"_ddzR/main\<CR>jj"
-        :execute "w"
-    endif
-:endfunction
 noremap <leader>c <Esc>:call ScratchCompile()<CR>
 
-"ctags
-nnoremap <F12> :YcmCompleter GoToDefinition<CR>
-inoremap <F12> <Esc>:YcmCompleter GoToDefinition<CR>
-nnoremap <C-F12> 5<C-w><C-]>
-inoremap <C-F12> <Esc>5<C-w><C-]>
 " Stack overflow
 nnoremap <leader>s :StackOverflow<space>
 
+" wrap paragraph
+nnoremap <leader>q gqip
+
 "uv
 nnoremap <leader>up :call UV#SelProj()<CR>
-nnoremap <leader>ut :call UV#SelProj()<CR>
+nnoremap <leader>ut :call UV#SelTarget()<CR>
+nnoremap <leader>ue :call UVedit()<CR>
+
+function! Incr()
+  let a = line('.') - line("'<")
+  let c = virtcol("'<")
+  if a > 0
+    execute 'normal! '.c.'|'.a."\<C-a>"
+  endif
+  normal `<
+endfunction
+vnoremap <C-a> :call Incr()<CR>
+
+fu! Func(name)
+    echo 'Searching for ' . a:name . '...'
+    let re = '^\(static\ \+\)*\(inline\ \+\)*\(\w\+\ \+\)' . a:name . '\s*('
+    let loc = system('grep --color -rnI --include=*.c "' . re . '" .')
+    try
+        let file = matchstr(loc, "^[^:]*")
+        let line = matchstr(loc, "^[0-9]*", strlen(file) + 1)
+        let filename = matchstr(file, "[^/]*$")
+        try
+            exe ':tab sbuf ' . filename
+            call cursor(line, 1)
+        catch
+            try
+                exe ':tabe ' . file
+                call cursor(line, 1)
+            catch
+                echo 'Cannot find file ' . filename
+                echom v:exception
+            endtry
+        endtry
+    catch
+        echo 'grep failed, returned ' . loc
+    endtry
+endf
+fu! FuncPeek(name)
+    echo 'Searching for ' . a:name . '...'
+    let re = '^\(static\ \+\)*\(inline\ \+\)*\(\w\+\ \+\)' . a:name . '\s*('
+    let loc = system('grep --color -rnI --include=*.c "' . re . '" .')
+    try
+        let file = matchstr(loc, "^[^:]*")
+        let line = matchstr(loc, "^[0-9]*", strlen(file) + 1)
+        let filename = matchstr(file, "[^/]*$")
+        set nosb
+        exe ':2sp +' .line . ' ' . file
+        exe 'normal! ' . line . 'G'
+        exe 'normal! <C-w><C-j>'
+    catch
+        echo 'grep failed, returned ' . loc
+    endtry
+endf
+fu! FuncEcho(name)
+    let re = '^\(static\ \+\)*\(inline\ \+\)*\(\w\+\ \+\)' . a:name . '\s*('
+    let loc = system('grep --color -rnI --include=*.c "' . re . '" .')
+    try
+        let signature = matchstr(loc, "[^:]*$")
+        let output = matchstr(signature, "[^)]*)")
+        if strlen(output) == 0
+            echo signature[:-2]
+        else
+            echo output
+        endif
+    catch
+        echo 'grep failed, returned ' . loc
+    endtry
+endf
+
+com! -nargs=1 Func :call Func(<f-args>)
+nnoremap <silent> <F12> "*yiw:call Func(@*)<CR>
+nnoremap <silent> <S-F12> "*yiw:call FuncPeek(@*)<CR>
+nnoremap <silent> <C-F12> "*yiw:call FuncEcho(@*)<CR>
+inoremap <silent> <F12> <Esc>"*yiw:call Func(@*)<CR>
+inoremap <silent> <S-F12> <Esc>"*yiw:call FuncPeek(@*)<CR>
+inoremap <silent> <C-F12> <Esc>"*yiw:call FuncEcho(@*)<CR>
+vnoremap <silent> <F12> <Esc>"*yiw:call Func(@*)<CR>
+vnoremap <silent> <S-F12> <Esc>"*yiw:call FuncPeek(@*)<CR>
+vnoremap <silent> <C-F12> <Esc>"*yiw:call FuncEcho(@*)<CR>
+
+fu! MakeNote(name)
+    let l:filepath = '$USERPROFILE/notes/' . a:name . '.md'
+    exe ':tabe ' . l:filepath
+    if !filereadable(glob(l:filepath))
+        exe ':normal! cc# ' . substitute(a:name, '\w', '\U\0', '')
+        :normal o
+    endif
+endf
+com! -nargs=1 Note :call MakeNote(<f-args>)
