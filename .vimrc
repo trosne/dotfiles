@@ -78,20 +78,14 @@ endfun
 "automatically on save:
 autocmd BufWritePre * :call TrimWhitespace()
 """"""""""""""" extensions
-if has('gui_running')
-    execute pathogen#infect()
-endif
+execute pathogen#infect()
 """"""""""""""" Colorscheme
 let g:solarized_italic = 0
 try
-    if has('gui_running')
-        let g:gruvbox_italic=0
-        let g:gruvbox_bold=0
-        let g:gruvbox_invert_selection=0
-        colors gruvbox
-    else
-        colors busybee
-    endif
+    let g:gruvbox_italic=0
+    let g:gruvbox_bold=0
+    let g:gruvbox_invert_selection=0
+    colors gruvbox
 catch /^Vim\%((\a\+)\)\=:E185/ "colorscheme does not exist
     colors desert " backup
 endtry
@@ -120,6 +114,12 @@ if has('gui_running') && !exists('g:loaded_syntastic_plugin')
 else
     let g:loaded_syntastic_plugin=1
 endif
+
+""" Clang complete
+let g:clang_complete_macros=1
+let g:clang_complete_patterns=1
+let g:clang_snippets=1
+let g:clang_snippets_engine='ultisnips'
 
 """"""" airline
 if has('gui_running')
@@ -197,8 +197,8 @@ fu! SetUVfileOptions()
 endf
 "quickfix stuff
 au BufWinEnter quickfix setl cc=999 " No color column in quickfix window
-au BufWinEnter quickfix resize 6
 au BufWinEnter quickfix nnoremap <buffer> <Esc> :q<CR>
+au BufWinEnter quickfix setl nowrap
 
 " autocommands
 au BufRead,BufNewFile *.html.erb set filetype=html
@@ -223,7 +223,7 @@ augroup Binary
       au BufWritePost *.bin set nomod | endif
 augroup END
 """"""""""""""" mapping
-command! Vimrc tabedit $VIM\.vimrc
+exe 'command! Vimrc tabedit ' . expand('<sfile>')
 nnoremap <F7> :Make<CR>
 
 """"""""""""""""""""""" MOVEMENT
@@ -296,72 +296,8 @@ function! Incr()
 endfunction
 vnoremap <C-a> :call Incr()<CR>
 
-fu! Func(name)
-    echo 'Searching for ' . a:name . '...'
-    let re = '^\(static\ \+\)*\(inline\ \+\)*\(\w\+\ \+\)' . a:name . '\s*('
-    let loc = system('grep --color -rnI --include=*.c "' . re . '" .')
-    try
-        let file = matchstr(loc, "^[^:]*")
-        let line = matchstr(loc, "^[0-9]*", strlen(file) + 1)
-        let filename = matchstr(file, "[^/]*$")
-        try
-            exe ':tab sbuf ' . filename
-            call cursor(line, 1)
-        catch
-            try
-                exe ':tabe ' . file
-                call cursor(line, 1)
-            catch
-                echo 'Cannot find file ' . filename
-                echom v:exception
-            endtry
-        endtry
-    catch
-        echo 'grep failed, returned ' . loc
-    endtry
-endf
-fu! FuncPeek(name)
-    echo 'Searching for ' . a:name . '...'
-    let re = '^\(static\ \+\)*\(inline\ \+\)*\(\w\+\ \+\)' . a:name . '\s*('
-    let loc = system('grep --color -rnI --include=*.c "' . re . '" .')
-    try
-        let file = matchstr(loc, "^[^:]*")
-        let line = matchstr(loc, "^[0-9]*", strlen(file) + 1)
-        let filename = matchstr(file, "[^/]*$")
-        set nosb
-        exe ':2sp +' .line . ' ' . file
-        exe 'normal! ' . line . 'G'
-        exe 'normal! <C-w><C-j>'
-    catch
-        echo 'grep failed, returned ' . loc
-    endtry
-endf
-fu! FuncEcho(name)
-    let re = '^\(static\ \+\)*\(inline\ \+\)*\(\w\+\ \+\)' . a:name . '\s*('
-    let loc = system('grep --color -rnI --include=*.c "' . re . '" .')
-    try
-        let signature = matchstr(loc, "[^:]*$")
-        let output = matchstr(signature, "[^)]*)")
-        if strlen(output) == 0
-            echo signature[:-2]
-        else
-            echo output
-        endif
-    catch
-        echo 'grep failed, returned ' . loc
-    endtry
-endf
-
-com! -nargs=1 Func :call Func(<f-args>)
-nnoremap <silent> <F12> "*yiw:call Func(@*)<CR>
-nnoremap <silent> <S-F12> "*yiw:call FuncPeek(@*)<CR>
-nnoremap <silent> <C-F12> "*yiw:call FuncEcho(@*)<CR>
-inoremap <silent> <F12> <Esc>"*yiw:call Func(@*)<CR>
-inoremap <silent> <S-F12> <Esc>"*yiw:call FuncPeek(@*)<CR>
-inoremap <silent> <C-F12> <Esc>"*yiw:call FuncEcho(@*)<CR>
-vnoremap <silent> <F12> <Esc>"*yiw:call Func(@*)<CR>
-vnoremap <silent> <S-F12> <Esc>"*yiw:call FuncPeek(@*)<CR>
-vnoremap <silent> <C-F12> <Esc>"*yiw:call FuncEcho(@*)<CR>
+nnoremap <silent> <F12> "*yiw:call AGrepGetDefine(@*, 1)<CR>
+nnoremap <silent> <S-F12> "*yiw:call AGrepGetDefine(@*, 0)<CR>
 
 fu! MakeNote(name)
     let l:filepath = '$USERPROFILE/notes/' . a:name . '.md'
