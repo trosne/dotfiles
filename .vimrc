@@ -8,7 +8,7 @@ if has('gui_running')
     source $VIMRUNTIME/delmenu.vim
     source $VIMRUNTIME/menu.vim
     set guioptions=
-    let &colorcolumn=join(range(120,999),",")
+    let &colorcolumn=join(range(120,500),",")
 endif
 
 set encoding=utf-8
@@ -195,10 +195,16 @@ fu! SetUVfileOptions()
     setl foldminlines=0
     setl foldnestmax=999
 endf
+fu! SetPreviewOptions()
+    setl nonu
+    setl cc=999
+    setl syntax=c
+endf
 "quickfix stuff
 au BufWinEnter quickfix setl cc=999 " No color column in quickfix window
 au BufWinEnter quickfix resize 6
 au BufWinEnter quickfix nnoremap <buffer> <Esc> :q<CR>
+au BufWinEnter * if &previewwindow | call SetPreviewOptions() | endif
 
 " autocommands
 au BufRead,BufNewFile *.html.erb set filetype=html
@@ -209,6 +215,7 @@ au BufRead,BufNewFile *.ino set filetype=cpp " Arduino
 au BufRead,BufNewFile *.py call SetPythonOptions()
 au BufRead,BufNewFile *.md set filetype=markdown
 au BufWritePost *.msc silent exe "call job_start('mscgen -T png " . expand('%') ."')"
+au BufWritePost *.dot silent exe "call job_start('dot -Tpng -O " . expand('%') ."')"
 au BufWritePost *.adoc silent !start /min cmd /c C:/Users/trsn/Downloads/asciidoc-8.6.9/asciidoc-8.6.9/asciidoc.py %
 au FileType c silent set cindent
 au FileType cpp set cindent
@@ -280,6 +287,9 @@ nnoremap <leader>s :StackOverflow<space>
 
 " wrap paragraph
 nnoremap <leader>q gqip
+
+" Tab
+vnoremap <leader>t :Tab /\S\+;<CR>
 
 "uv
 nnoremap <leader>up :call UV#SelProj()<CR>
@@ -372,3 +382,19 @@ fu! MakeNote(name)
     endif
 endf
 com! -nargs=1 Note :call MakeNote(<f-args>)
+
+fu! FuncSearchBack()
+    return getline(search('^\(static \| inline \)*\w\+\s\+\w\+(.*)\s*{\=\s*$', 'bwnc'))
+endf
+fu! SetFuncSearchStatusline()
+    let g:airline_section_b='%{FuncSearchBack()}'
+    :AirlineRefresh
+endf
+fu! RestoreBranchIndicator()
+    let g:airline_section_b='%{airline#util#wrap(airline#extensions#branch#get_head(),0)}'
+    :AirlineRefresh
+endf
+au BufLeave *.c call RestoreBranchIndicator()
+au BufEnter,BufWinEnter *.c call SetFuncSearchStatusline()
+
+
